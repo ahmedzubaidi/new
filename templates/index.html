@@ -1,0 +1,59 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>بوت الدردشة</title>
+    <style>
+        body { font-family: Arial, sans-serif; direction: rtl; }
+        #chatbox { width: 500px; margin: 0 auto; }
+        #chatlog { border: 1px solid #ccc; height: 400px; padding: 10px; overflow-y: scroll; }
+        #userInput { width: 80%; padding: 10px; }
+        #sendButton { padding: 10px; }
+        .user { color: blue; }
+        .bot { color: green; }
+    </style>
+</head>
+<body>
+    <div id="chatbox">
+        <h2>بوت الدردشة</h2>
+        <div id="chatlog"></div>
+        <input type="text" id="userInput" placeholder="اكتب رسالتك هنا...">
+        <button id="sendButton">إرسال</button>
+    </div>
+
+    <script>
+        const sendButton = document.getElementById("sendButton");
+        const userInput = document.getElementById("userInput");
+        const chatlog = document.getElementById("chatlog");
+
+        sendButton.addEventListener("click", sendMessage);
+        userInput.addEventListener("keypress", function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        function sendMessage() {
+            const message = userInput.value;
+            if (message.trim() === "") return;
+            appendMessage("أنت", message, "user");
+            fetch(`/get?msg=${encodeURIComponent(message)}`)
+                .then(response => response.json())
+                .then(data => {
+                    appendMessage("بوت", data, "bot");
+                });
+            userInput.value = "";
+        }
+
+        function appendMessage(sender, message, type) {
+            const msgDiv = document.createElement("div");
+            msgDiv.classList.add(type);
+            msgDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
+            chatlog.appendChild(msgDiv);
+            chatlog.scrollTop = chatlog.scrollHeight;
+        }
+    </script>
+</body>
+</html>
